@@ -99,7 +99,9 @@ defmodule Filterable do
 
   @spec filter_values(map | Keyword.t(), module, Keyword.t()) :: {:ok, map} | {:error, String.t()}
   def filter_values(params, module, opts \\ []) do
-    Utils.reduce_with(module.defined_filters, %{}, fn {filter_name, filter_opts}, acc ->
+    Utils.reduce_with(Utils.sort_filters_with_order(module.defined_filters), %{}, fn {filter_name,
+                                                                                      filter_opts},
+                                                                                     acc ->
       options =
         [param: filter_name]
         |> Keyword.merge(@default_options)

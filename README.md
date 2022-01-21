@@ -284,6 +284,16 @@ filter title(query, value) do
 end
 ```
 
+`:filter_order` - set the order of the queries. Can be `:first`, `:last` or a
+number:
+
+```elixir
+@options filter_order: :last
+filter title(query, value) do
+  query |> where(title: ^value)
+end
+```
+
 All these options can be specified in `apply_filters` function or `filterable` macro. Then they will take affect on all defined filters:
 
 ```elixir
