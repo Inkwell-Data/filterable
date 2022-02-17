@@ -117,30 +117,33 @@ defmodule Filterable do
   end
 
   defp filters_result(queryable, filter_values, module, opts) do
-    Utils.reduce_with(module.defined_filters, queryable, fn {filter_name, filter_opts},
-                                                            queryable ->
-      options = Keyword.merge(opts, filter_opts)
-      value = Map.get(filter_values, filter_name)
+    Utils.reduce_with(
+      Utils.sort_filters_with_order(module.defined_filters),
+      queryable,
+      fn {filter_name, filter_opts}, queryable ->
+        options = Keyword.merge(opts, filter_opts)
+        value = Map.get(filter_values, filter_name)
 
-      share = Keyword.get(options, :share)
-      allow_nil = Keyword.get(options, :allow_nil)
-      has_value = value != nil
+        share = Keyword.get(options, :share)
+        allow_nil = Keyword.get(options, :allow_nil)
+        has_value = value != nil
 
-      try do
-        cond do
-          (allow_nil || has_value) && share ->
-            apply(module, filter_name, [queryable, value, share])
+        try do
+          cond do
+            (allow_nil || has_value) && share ->
+              apply(module, filter_name, [queryable, value, share])
 
-          allow_nil || has_value ->
-            apply(module, filter_name, [queryable, value])
+            allow_nil || has_value ->
+              apply(module, filter_name, [queryable, value])
 
-          true ->
-            queryable
+            true ->
+              queryable
+          end
+        rescue
+          FunctionClauseError -> queryable
         end
-      rescue
-        FunctionClauseError -> queryable
       end
-    end)
+    )
   end
 
   defp filterable(module, block, opts) do
