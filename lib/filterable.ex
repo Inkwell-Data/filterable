@@ -99,7 +99,7 @@ defmodule Filterable do
 
   @spec filter_values(map | Keyword.t(), module, Keyword.t()) :: {:ok, map} | {:error, String.t()}
   def filter_values(params, module, opts \\ []) do
-    Utils.reduce_with(Utils.sort_filters_with_order(module.defined_filters), %{}, fn {filter_name,
+    Utils.reduce_with(Utils.sort_filters_with_order(module.defined_filters()), %{}, fn {filter_name,
                                                                                       filter_opts},
                                                                                      acc ->
       options =
@@ -118,7 +118,7 @@ defmodule Filterable do
 
   defp filters_result(queryable, filter_values, module, opts) do
     Utils.reduce_with(
-      Utils.sort_filters_with_order(module.defined_filters),
+      Utils.sort_filters_with_order(module.defined_filters()),
       queryable,
       fn {filter_name, filter_opts}, queryable ->
         options = Keyword.merge(opts, filter_opts)
