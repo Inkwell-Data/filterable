@@ -38,4 +38,31 @@ defmodule Filterable.Utils do
   def ensure_string(nil), do: nil
   def ensure_string(value) when is_bitstring(value), do: value
   def ensure_string(value) when is_atom(value), do: Atom.to_string(value)
+
+  def remove_atom(value) when is_atom(value), do: 0
+  def remove_atom(value), do: value
+
+  def get_max(defined_filters) do
+    {_, v} =
+      Enum.max(defined_filters, fn {_, v1}, {_, v2} ->
+        remove_atom(Keyword.get(v1, :filter_order, 0)) >=
+          remove_atom(Keyword.get(v2, :filter_order, 0))
+      end)
+
+    Keyword.get(v, :order, 0)
+  end
+
+  def sort_filters_with_order(defined_filters) do
+    Enum.sort_by(
+      defined_filters,
+      fn {_k, v} ->
+        case Keyword.get(v, :filter_order, 0) do
+          0 -> 0
+          :last -> get_max(defined_filters) + 1
+          :first -> -1
+          val -> val
+        end
+      end
+    )
+  end
 end
